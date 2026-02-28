@@ -18,8 +18,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen min-h-dvh max-w-[480px] md:max-w-6xl w-full mx-auto flex flex-col md:flex-row bg-white md:bg-transparent shadow-sm md:shadow-none md:p-6 md:gap-6">
-      {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 shrink-0 bg-white rounded-intermediate-lg shadow-sm border border-slate-200 p-4">
+      {/* Desktop Sidebar - sticky so it stays visible when scrolling */}
+      <aside className="hidden md:flex flex-col w-64 shrink-0 self-start sticky top-6 bg-white rounded-intermediate-lg shadow-sm border border-slate-200 p-4">
         <div className="mb-8 px-4 pt-4">
           <h1 className="text-xl font-bold text-slate-800">HandOut</h1>
         </div>
@@ -43,14 +43,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </nav>
       </aside>
 
-      {/* Main Content */}
-      <main id="main-content" className="flex-1 flex flex-col min-h-0 overflow-hidden md:bg-white md:rounded-intermediate-lg md:shadow-sm md:border md:border-slate-200 relative" tabIndex={-1}>
+      {/* Main Content - pb-20 on mobile for fixed nav clearance */}
+      <main id="main-content" className="flex-1 flex flex-col min-h-0 overflow-hidden md:bg-white md:rounded-intermediate-lg md:shadow-sm md:border md:border-slate-200 relative pb-20 md:pb-0" tabIndex={-1}>
         {children}
       </main>
 
-      {/* Mobile Bottom Nav */}
+      {/* Mobile Bottom Nav - fixed so always visible */}
       <nav
-        className="md:hidden shrink-0 border-t border-slate-200/50 bg-white/80 backdrop-blur-md px-4 py-3 pb-safe flex items-center justify-around"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-slate-200/50 bg-white/90 backdrop-blur-md px-4 py-3 pb-safe flex items-center justify-around max-w-[480px] mx-auto"
         aria-label="Primary navigation"
       >
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => (

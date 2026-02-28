@@ -93,6 +93,7 @@ export default function AIStudyAssistant() {
         setCourseCode(data.courseCode ?? "—");
         setHasUploaded(true);
         setSummaryLoaded(true);
+        setActiveTab("summary");
       })
       .catch(() => {});
     return () => { cancelled = true; };

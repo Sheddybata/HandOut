@@ -141,7 +141,7 @@ export default function ProfilePage() {
           type="button"
           onClick={() => {
             signOut().then(() => {
-              window.location.href = "/";
+              window.location.href = "/login";
             });
           }}
           className="min-h-[48px] w-full rounded-intermediate border-2 border-slate-300 text-slate-700 font-medium flex items-center justify-center gap-2 hover:bg-slate-50"

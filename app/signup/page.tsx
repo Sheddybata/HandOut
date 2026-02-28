@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import { CheckCircle2 } from "lucide-react";
 import { supabaseClient } from "@/lib/supabaseClient";
 
 function SignUpForm() {
@@ -12,8 +13,12 @@ function SignUpForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
+
+  const loginUrl = "/login" + (callbackUrl !== "/" ? "?callbackUrl=" + encodeURIComponent(callbackUrl) : "");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -38,8 +43,8 @@ function SignUpForm() {
       }
       const session = data.session;
       if (!session) {
-        setError("Account created. Please sign in on the login page.");
         setLoading(false);
+        setShowSuccessModal(true);
         return;
       }
       const signInRes = await supabaseClient.auth.signInWithPassword({
@@ -48,7 +53,7 @@ function SignUpForm() {
       });
       setLoading(false);
       if (signInRes.error) {
-        setError("Account created. Please sign in on the login page.");
+        setShowSuccessModal(true);
         return;
       }
       window.location.href = callbackUrl;
@@ -58,8 +63,42 @@ function SignUpForm() {
     }
   }
 
+  function goToLogin() {
+    router.push(loginUrl);
+  }
+
   return (
     <main id="main-content" className="min-h-screen w-full max-w-[480px] mx-auto flex flex-col justify-center px-4 bg-slate-50">
+      {/* Success modal: check email to confirm */}
+      {showSuccessModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 pt-safe pb-safe bg-black/50"
+          style={{ paddingLeft: "max(1rem, env(safe-area-inset-left))", paddingRight: "max(1rem, env(safe-area-inset-right))" }}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="signup-success-title"
+        >
+          <div className="w-full max-w-[400px] rounded-t-[1.25rem] sm:rounded-intermediate-lg bg-white shadow-xl p-6 sm:p-8 text-center">
+            <div className="mx-auto w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
+              <CheckCircle2 className="w-8 h-8 text-emerald-600" aria-hidden />
+            </div>
+            <h2 id="signup-success-title" className="text-xl font-semibold text-slate-800 mb-2">
+              Registration complete
+            </h2>
+            <p className="text-slate-600 mb-6">
+              Please check your email to confirm your sign-up. Once confirmed, you can sign in.
+            </p>
+            <button
+              type="button"
+              onClick={goToLogin}
+              className="w-full min-h-[48px] rounded-intermediate bg-emerald-600 text-white font-medium hover:bg-emerald-700 transition-colors active:scale-[0.98]"
+            >
+              Go to sign in
+            </button>
+          </div>
+        </div>
+      )}
+
       <div className="rounded-intermediate-lg border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] bg-white p-6 md:p-8">
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 mb-2">Create an account</h1>
         <p className="text-base text-slate-500 mb-8">

@@ -54,5 +54,6 @@ export async function ensurePublicUserRecord(user: AuthenticatedUser): Promise<v
 
   if (error) {
     console.error("ensurePublicUserRecord error:", error);
+    throw new Error("Could not create user record. Please try again.");
   }
 }

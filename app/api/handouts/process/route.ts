@@ -69,6 +69,7 @@ export async function POST(request: NextRequest) {
         courseCode,
         summary,
         quiz,
+        saved: true,
       });
     }
 

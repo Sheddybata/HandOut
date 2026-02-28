@@ -55,6 +55,7 @@ export default function AIStudyAssistant() {
   const [hasUploaded, setHasUploaded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [summaryLoading, setSummaryLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [summaryLoaded, setSummaryLoaded] = useState(false);
   const [quizCurrent, setQuizCurrent] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string>>({});
@@ -72,6 +73,8 @@ export default function AIStudyAssistant() {
   const [signUpPromptOpen, setSignUpPromptOpen] = useState(false);
   const [signUpPromptContext, setSignUpPromptContext] = useState<"upload" | "download" | "save">("upload");
   const [showPostTrySignUpBanner, setShowPostTrySignUpBanner] = useState(false);
+  const [showSavedToAccount, setShowSavedToAccount] = useState(false);
+  const [showGuestNotSavedHint, setShowGuestNotSavedHint] = useState(false);
   const isSignedIn = status === "authenticated" && !!accessToken;
   const searchParams = useSearchParams();
   const handoutIdFromUrl = searchParams.get("handout");
@@ -166,6 +169,14 @@ export default function AIStudyAssistant() {
       setQuizSubmitted(false);
       setSummaryLoaded(true);
       setUploadError(null);
+      if (processData.saved) {
+        setShowSavedToAccount(true);
+        setTimeout(() => setShowSavedToAccount(false), 5000);
+      }
+      if (processData.guestTrial) {
+        setShowGuestNotSavedHint(true);
+        setTimeout(() => setShowGuestNotSavedHint(false), 6000);
+      }
     } catch {
       const message = "Slow network or temporary connection issue. Please retry generation.";
       setUploadError(message);
@@ -182,6 +193,8 @@ export default function AIStudyAssistant() {
     let uploadedHandoutId: string | null = null;
     let uploadedFilename: string | null = null;
     if (file) {
+      setUploading(true);
+      setActiveTab("summary");
       const formData = new FormData();
       formData.append("file", file);
       try {
@@ -192,6 +205,7 @@ export default function AIStudyAssistant() {
         const data = await res.json().catch(() => ({}));
         if (!res.ok) {
           setUploadError(data.error ?? "Upload failed. Please try again.");
+          setUploading(false);
           return;
         }
         uploadedHandoutId = data.handoutId ?? null;
@@ -200,7 +214,10 @@ export default function AIStudyAssistant() {
         setFilename(uploadedFilename);
       } catch {
         setUploadError("Network error. Please check your connection and try again.");
+        setUploading(false);
         return;
+      } finally {
+        setUploading(false);
       }
     }
     if (!uploadedHandoutId || !uploadedFilename) {
@@ -357,6 +374,24 @@ export default function AIStudyAssistant() {
             </button>
           ))}
         </div>
+        {showSavedToAccount && (
+          <div
+            role="status"
+            className="mt-3 rounded-intermediate border border-emerald-200 bg-emerald-50 px-3 py-2 text-sm text-emerald-800 flex items-center gap-2"
+          >
+            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600" aria-hidden />
+            <span>Saved to your account. Find it in Saved.</span>
+          </div>
+        )}
+        {showGuestNotSavedHint && (
+          <div
+            role="status"
+            className="mt-3 rounded-intermediate border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 flex items-center gap-2"
+          >
+            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" aria-hidden />
+            <span>This handout wasn&apos;t saved. Sign in before generating to save to Saved.</span>
+          </div>
+        )}
       </header>
 
       {/* Tab panels — single-column feed; momentum scroll on iOS */}
@@ -472,7 +507,7 @@ export default function AIStudyAssistant() {
                     Upload a handout
                   </button>
                 </div>
-              ) : summaryLoading ? (
+              ) : uploading || summaryLoading ? (
                 <ProcessingLoader />
               ) : summaryLoaded ? (
                 <>
@@ -533,7 +568,7 @@ export default function AIStudyAssistant() {
                     Upload a handout
                   </button>
                 </div>
-              ) : summaryLoading ? (
+              ) : uploading || summaryLoading ? (
                 <ProcessingLoader />
               ) : quiz.length === 0 ? (
                 <div className="rounded-intermediate-lg border border-slate-200 bg-slate-50 p-8 flex flex-col items-center justify-center text-center min-h-[200px]">

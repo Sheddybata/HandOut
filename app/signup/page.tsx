@@ -56,6 +56,8 @@ function SignUpForm() {
         setShowSuccessModal(true);
         return;
       }
+      // Brief delay so session is persisted before redirect (fixes Saved not loading until re-sign-in)
+      await new Promise((r) => setTimeout(r, 150));
       window.location.href = callbackUrl;
     } catch {
       setError("Something went wrong. Please try again.");

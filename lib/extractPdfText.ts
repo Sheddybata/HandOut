@@ -28,18 +28,13 @@ export async function extractTextFromPdf(_handoutId: string, filename: string): 
     buffer = await readFile(filepath);
   }
 
-  // Use pdf-parse (with serverExternalPackages) to extract the full text of the PDF.
-  const { PDFParse } = await import("pdf-parse");
-  const parser = new PDFParse({ data: new Uint8Array(buffer) });
-
-  try {
-    const textResult = await parser.getText();
-    const text = (textResult?.text ?? "").trim();
-    if (!text || text.length < 50) {
-      throw new Error("The PDF could not be read or has too little text. Try a different file.");
-    }
-    return text;
-  } finally {
-    await parser.destroy();
+  // Use unpdf - serverless-friendly, no canvas required
+  const { extractText, getDocumentProxy } = await import("unpdf");
+  const pdf = await getDocumentProxy(new Uint8Array(buffer));
+  const { text } = await extractText(pdf, { mergePages: true });
+  const trimmed = (text ?? "").trim();
+  if (!trimmed || trimmed.length < 50) {
+    throw new Error("The PDF could not be read or has too little text. Try a different file.");
   }
+  return trimmed;
 }

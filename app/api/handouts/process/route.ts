@@ -5,6 +5,7 @@ import { createHandout, getHandoutById } from "@/lib/handouts";
 import { ensurePublicUserRecord, getUserFromRequest } from "@/lib/serverAuth";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300; // 5 min max for large PDFs + AI generation
 const GUEST_TRIAL_COOKIE = "handout_guest_trial_used";
 
 export async function POST(request: NextRequest) {

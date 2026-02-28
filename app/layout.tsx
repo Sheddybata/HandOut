@@ -5,6 +5,7 @@ import AuthProvider from "@/components/AuthProvider";
 import { LayoutWrapper } from "@/components/LayoutWrapper";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 const inter = Inter({
   subsets: ["latin"],

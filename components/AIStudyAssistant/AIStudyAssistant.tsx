@@ -10,7 +10,7 @@ import {
   Download,
   ChevronRight,
   RotateCcw,
-  AlertCircle,
+  CircleAlert,
   CheckCircle2,
   XCircle,
 } from "lucide-react";
@@ -388,7 +388,7 @@ export default function AIStudyAssistant() {
             role="status"
             className="mt-3 rounded-intermediate border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900 flex items-center gap-2"
           >
-            <AlertCircle className="h-4 w-4 shrink-0 text-amber-600" aria-hidden />
+            <CircleAlert className="h-4 w-4 shrink-0 text-amber-600" aria-hidden />
             <span>This handout wasn&apos;t saved. Sign in before generating to save to Saved.</span>
           </div>
         )}
@@ -415,7 +415,7 @@ export default function AIStudyAssistant() {
                   className="rounded-intermediate border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 space-y-2"
                 >
                   <div className="flex items-start gap-2">
-                    <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
+                    <CircleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
                     <div className="space-y-1">
                       <p>{uploadError}</p>
                       {uploadErrorKind === "quota" && (

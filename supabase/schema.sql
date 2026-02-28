@@ -29,6 +29,13 @@ create index if not exists handouts_user_id_created_at_idx
 
 -- Storage bucket for uploaded PDFs.
 -- Keep this bucket private because uploads/downloads happen on the server with service role key.
+-- Ensure SUPABASE_STORAGE_BUCKET=handouts and SUPABASE_SERVICE_ROLE_KEY are set in Vercel/env;
+-- a 403 on upload usually means the bucket is missing, the key is wrong, or the bucket name in env doesn't match.
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('handouts', 'handouts', false, 10485760, array['application/pdf'])
 on conflict (id) do nothing;
+
+-- Allow inserts into handouts bucket (server uses service role; required so uploads work).
+create policy "Allow handouts bucket insert"
+on storage.objects for insert to public
+with check (bucket_id = 'handouts');

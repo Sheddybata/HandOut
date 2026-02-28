@@ -86,11 +86,6 @@ function LoginForm() {
             Sign up
           </Link>
         </p>
-        <p className="mt-2 text-sm text-slate-600 text-center">
-          <Link href="/" className="text-trust-blue hover:underline">
-            ← Back to Home
-          </Link>
-        </p>
       </div>
     </main>
   );

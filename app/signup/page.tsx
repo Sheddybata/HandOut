@@ -172,9 +172,6 @@ function SignUpForm() {
         <p className="mt-6 text-sm text-slate-600 text-center">
           Already have an account? <Link href={"/login?callbackUrl=" + encodeURIComponent(callbackUrl)} className="text-trust-blue hover:underline">Sign in</Link>
         </p>
-        <p className="mt-2 text-sm text-slate-600 text-center">
-          <Link href="/" className="text-trust-blue hover:underline">← Back to Home</Link>
-        </p>
       </div>
     </main>
   );

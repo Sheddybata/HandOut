@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -22,6 +21,7 @@ import { ProcessingLoader } from "@/components/ui/ProcessingLoader";
 import { SignUpPrompt } from "@/components/SignUpPrompt";
 import { downloadSummaryPdf } from "@/lib/downloadSummaryPdf";
 import { type MainTab, type SummaryPoint, type QuizQuestion } from "@/lib/studyTypes";
+import { useAuth } from "@/components/AuthProvider";
 
 const TABS: { id: MainTab; label: string; icon: React.ElementType }[] = [
   { id: "upload", label: "Upload", icon: Upload },
@@ -50,7 +50,7 @@ function classifyError(message: string): UploadErrorKind {
 }
 
 export default function AIStudyAssistant() {
-  const { data: session, status } = useSession();
+  const { status, accessToken } = useAuth();
   const [activeTab, setActiveTab] = useState<MainTab>("upload");
   const [hasUploaded, setHasUploaded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -72,7 +72,7 @@ export default function AIStudyAssistant() {
   const [signUpPromptOpen, setSignUpPromptOpen] = useState(false);
   const [signUpPromptContext, setSignUpPromptContext] = useState<"upload" | "download" | "save">("upload");
   const [showPostTrySignUpBanner, setShowPostTrySignUpBanner] = useState(false);
-  const isSignedIn = status === "authenticated" && !!session;
+  const isSignedIn = status === "authenticated" && !!accessToken;
   const searchParams = useSearchParams();
   const handoutIdFromUrl = searchParams.get("handout");
 
@@ -80,7 +80,9 @@ export default function AIStudyAssistant() {
   useEffect(() => {
     if (!handoutIdFromUrl || !isSignedIn) return;
     let cancelled = false;
-    fetch(`/api/handouts/${encodeURIComponent(handoutIdFromUrl)}`)
+    fetch(`/api/handouts/${encodeURIComponent(handoutIdFromUrl)}`, {
+      headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (cancelled || !data) return;
@@ -94,7 +96,7 @@ export default function AIStudyAssistant() {
       })
       .catch(() => {});
     return () => { cancelled = true; };
-  }, [handoutIdFromUrl, isSignedIn]);
+  }, [handoutIdFromUrl, isSignedIn, accessToken]);
 
   // After first-time use (summary loaded), prompt to sign up once per session
   useEffect(() => {
@@ -137,7 +139,10 @@ export default function AIStudyAssistant() {
     try {
       const processRes = await fetch("/api/handouts/process", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+        },
         body: JSON.stringify(meta),
       });
       const processData = await processRes.json().catch(() => ({}));
@@ -168,7 +173,7 @@ export default function AIStudyAssistant() {
       setSummaryLoading(false);
       setUploadMessage(null);
     }
-  }, [isSignedIn]);
+  }, [isSignedIn, accessToken]);
 
   const startProcessing = useCallback(async (file: File | null) => {
     setUploadError(null);
@@ -204,7 +209,7 @@ export default function AIStudyAssistant() {
     setHasUploaded(true);
     setActiveTab("summary");
     await runGeneration({ handoutId: uploadedHandoutId, filename: uploadedFilename });
-  }, [isSignedIn, runGeneration]);
+  }, [runGeneration]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {

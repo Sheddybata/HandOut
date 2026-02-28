@@ -1,17 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { extractTextFromPdf } from "@/lib/extractPdfText";
 import { generateSummaryAndQuiz } from "@/lib/generateSummaryAndQuiz";
 import { createHandout, getHandoutById } from "@/lib/handouts";
+import { ensurePublicUserRecord, getUserFromRequest } from "@/lib/serverAuth";
 
 export const dynamic = "force-dynamic";
 const GUEST_TRIAL_COOKIE = "handout_guest_trial_used";
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    const userId = session?.user?.id;
+    const user = await getUserFromRequest(request);
+    const userId = user?.id;
     const isSignedIn = Boolean(userId);
 
     if (!isSignedIn && request.cookies.get(GUEST_TRIAL_COOKIE)?.value === "1") {
@@ -52,6 +51,7 @@ export async function POST(request: NextRequest) {
     const { summary, quiz, courseTitle, courseCode } = await generateSummaryAndQuiz(text);
 
     if (isSignedIn) {
+      await ensurePublicUserRecord(user!);
       await createHandout(
         handoutId,
         userId as string,

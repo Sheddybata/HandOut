@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 function LoginForm() {
   const [email, setEmail] = useState("");
@@ -17,18 +17,16 @@ function LoginForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const res = await signIn("credentials", {
-      email,
+    const { error } = await supabaseClient.auth.signInWithPassword({
+      email: email.trim(),
       password,
-      redirect: false,
-      callbackUrl,
     });
-    setLoading(false);
-    if (res?.error) {
+    if (error) {
       setError("Invalid email or password. Please try again.");
+      setLoading(false);
       return;
     }
-    if (res?.url) window.location.href = res.url;
+    window.location.href = callbackUrl;
   }
 
   return (

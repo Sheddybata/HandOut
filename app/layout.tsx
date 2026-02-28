@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { SessionProvider } from "@/components/SessionProvider";
-import { LayoutWrapper } from "@/components/LayoutWrapper";
+import AuthProvider from "@/components/AuthProvider";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,11 +38,11 @@ export default function RootLayout({
         >
           Skip to main content
         </a>
-        <SessionProvider>
+        <AuthProvider>
           <div className="min-h-screen bg-slate-100 flex justify-center w-full">
-            <LayoutWrapper>{children}</LayoutWrapper>
+            {children}
           </div>
-        </SessionProvider>
+        </AuthProvider>
       </body>
     </html>
   );

@@ -29,7 +29,7 @@ Results are **saved to the signed-in user’s account** and listed on the **Save
    ```
    OPENAI_API_KEY=sk-your-actual-key-here
    ```
-3. Keep your existing NextAuth vars in `.env.local` (e.g. `NEXTAUTH_SECRET`, `NEXTAUTH_URL`).
+3. Ensure your Supabase auth vars are set in `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`).
 
 ---
 

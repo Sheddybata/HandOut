@@ -1,7 +1,7 @@
 "use client";
 
-import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
+import { useAuth } from "@/components/AuthProvider";
 import {
   User,
   LogIn,
@@ -14,8 +14,7 @@ import {
 } from "lucide-react";
 
 export default function ProfilePage() {
-  const { data: session, status } = useSession();
-  const user = session?.user;
+  const { user, status, signOut } = useAuth();
   if (status === "loading") {
     return (
       <div className="flex-1 overflow-y-auto px-4 py-6">
@@ -25,7 +24,7 @@ export default function ProfilePage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <h1 className="text-slate-800 text-xl font-semibold mb-1">Profile</h1>
@@ -52,7 +51,7 @@ export default function ProfilePage() {
     );
   }
 
-  const initials = (user?.name || user?.email || "U")
+  const initials = (user.name || user.email || "U")
     .slice(0, 2)
     .toUpperCase();
 
@@ -79,7 +78,7 @@ export default function ProfilePage() {
             <Mail className="h-4 w-4 text-slate-500 mt-1" aria-hidden />
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Email</p>
-              <p className="text-slate-900 mt-0.5 break-all">{user?.email ?? "—"}</p>
+              <p className="text-slate-900 mt-0.5 break-all">{user.email ?? "—"}</p>
             </div>
           </div>
 
@@ -87,7 +86,7 @@ export default function ProfilePage() {
             <User className="h-4 w-4 text-slate-500 mt-1" aria-hidden />
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Name</p>
-              <p className="text-slate-900 mt-0.5">{user?.name ?? "—"}</p>
+              <p className="text-slate-900 mt-0.5">{user.name ?? "—"}</p>
             </div>
           </div>
 
@@ -140,7 +139,11 @@ export default function ProfilePage() {
 
         <button
           type="button"
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => {
+            signOut().then(() => {
+              window.location.href = "/";
+            });
+          }}
           className="min-h-[48px] w-full rounded-intermediate border-2 border-slate-300 text-slate-700 font-medium flex items-center justify-center gap-2 hover:bg-slate-50"
         >
           <LogOut className="h-5 w-5" aria-hidden />

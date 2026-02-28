@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { supabaseClient } from "@/lib/supabaseClient";
 
 function SignUpForm() {
   const [school, setSchool] = useState("");
@@ -20,29 +20,38 @@ function SignUpForm() {
     setError(null);
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ school, email, phone, password }),
+      const { data, error } = await supabaseClient.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          data: {
+            school: school.trim(),
+            phone: phone.trim(),
+            name: email.split("@")[0],
+          },
+        },
       });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setError(data.error ?? "Registration failed. Please try again.");
+      if (error) {
+        setError(error.message || "Registration failed. Please try again.");
         setLoading(false);
         return;
       }
-      const signInRes = await signIn("credentials", {
-        email,
+      const session = data.session;
+      if (!session) {
+        setError("Account created. Please sign in on the login page.");
+        setLoading(false);
+        return;
+      }
+      const signInRes = await supabaseClient.auth.signInWithPassword({
+        email: email.trim(),
         password,
-        redirect: false,
-        callbackUrl,
       });
       setLoading(false);
-      if (signInRes?.error) {
+      if (signInRes.error) {
         setError("Account created. Please sign in on the login page.");
         return;
       }
-      if (signInRes?.url) window.location.href = signInRes.url;
+      window.location.href = callbackUrl;
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);

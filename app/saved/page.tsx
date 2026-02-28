@@ -1,9 +1,9 @@
 "use client";
 
-import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Bookmark, LogIn, FileText } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
 interface SavedItem {
   handoutId: string;
@@ -15,25 +15,27 @@ interface SavedItem {
 }
 
 export default function SavedPage() {
-  const { data: session, status } = useSession();
+  const { user, status, accessToken } = useAuth();
   const [handouts, setHandouts] = useState<SavedItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [courseFilter, setCourseFilter] = useState("all");
 
   useEffect(() => {
-    if (status !== "authenticated" || !session) {
+    if (status !== "authenticated" || !user || !accessToken) {
       setLoading(false);
       return;
     }
-    fetch("/api/saved")
+    fetch("/api/saved", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
       .then((res) => res.ok ? res.json() : { handouts: [] })
       .then((data) => {
         setHandouts(data.handouts ?? []);
       })
       .catch(() => setHandouts([]))
       .finally(() => setLoading(false));
-  }, [status, session]);
+  }, [status, user, accessToken]);
 
   if (status === "loading" || loading) {
     return (
@@ -44,7 +46,7 @@ export default function SavedPage() {
     );
   }
 
-  if (!session) {
+  if (!user) {
     return (
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <h1 className="text-slate-800 text-xl font-semibold mb-1">Saved</h1>

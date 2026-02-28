@@ -2,6 +2,9 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/components/AuthProvider";
+import { LayoutWrapper } from "@/components/LayoutWrapper";
+
+export const dynamic = "force-dynamic";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -39,9 +42,9 @@ export default function RootLayout({
           Skip to main content
         </a>
         <AuthProvider>
-          <div className="min-h-screen bg-slate-100 flex justify-center w-full">
+          <LayoutWrapper>
             {children}
-          </div>
+          </LayoutWrapper>
         </AuthProvider>
       </body>
     </html>
